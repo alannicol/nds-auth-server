@@ -1,6 +1,7 @@
 package org.nds.auth;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -24,8 +25,10 @@ public class AuthenticateControllerTest {
 
     @Test
     public void getAuth() throws Exception {
-        mvc.perform(MockMvcRequestBuilders.get("/auth").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().string(equalTo("Greetings from Authentication server!")));
+        mvc.perform(MockMvcRequestBuilders.post("/auth")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .content("client_id=dhp_msg&client_secret=secret"))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().string(notNullValue()));
     }
 }
