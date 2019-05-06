@@ -5,6 +5,14 @@ public class AuthenticateRequest {
     private String client_id;
     private String client_secret;
 
+    public AuthenticateRequest() {
+    }
+
+    public AuthenticateRequest(String client_id, String client_secret) {
+        this.client_id = client_id;
+        this.client_secret = client_secret;
+    }
+
     public String getClient_id() {
         return client_id;
     }
