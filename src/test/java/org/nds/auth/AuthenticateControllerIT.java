@@ -29,7 +29,7 @@ public class AuthenticateControllerIT {
 
     @Before
     public void setUp() throws Exception {
-        this.base = new URL("http://localhost:" + port + "/auth");
+        this.base = new URL("http://localhost:" + port + "/token");
     }
 
     @Test

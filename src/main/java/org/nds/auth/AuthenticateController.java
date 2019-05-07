@@ -22,12 +22,7 @@ public class AuthenticateController {
 
     private String HS256_KEY="7OQdSnjzcne1NZBP8Sn671G5CS2kvGUtpG5HBjSNlrA";
 
-    @RequestMapping("/")
-    public String blank() {
-        return "";
-    }
-
-    @PostMapping(value = "/auth", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @PostMapping(value = "/token", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<AuthenticateResponse> authenticate(AuthenticateRequest authenticateRequest) {
 
         logger.info("Received authentication request", authenticateRequest);
