@@ -24,7 +24,7 @@ public class AuthenticateController {
 
         logger.info("Received authentication request", authenticateRequest);
 
-        return ResponseEntity.accepted().body(new AuthenticateResponse(createJWT(authenticateRequest.getClient_id(), authenticateRequest.getClient_secret()),"3600","Bearer"));
+        return ResponseEntity.ok().body(new AuthenticateResponse(createJWT(authenticateRequest.getClient_id(), authenticateRequest.getClient_secret()),"3600","Bearer"));
     }
 
     private String createJWT(String client_id, String client_secret) {
