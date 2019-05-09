@@ -1,4 +1,4 @@
-package org.nds.auth;
+package org.nds.auth.model;
 
 public class AuthenticateRequest {
 

@@ -1,9 +1,12 @@
-package org.nds.auth;
+package org.nds.auth.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.nds.auth.model.AuthenticateRequest;
+import org.nds.auth.model.AuthenticateResponse;
+import org.nds.auth.util.ServerProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -20,28 +23,37 @@ public class AuthenticateController {
 
     private static Logger logger = LoggerFactory.getLogger(AuthenticateController.class);
 
-    private String HS256_KEY="7OQdSnjzcne1NZBP8Sn671G5CS2kvGUtpG5HBjSNlrA";
+    private static final String TOKEN_PATH="/token";
+    private static final String CLIENT_ID="client_id";
+    private static final String SCOPE="scope";
 
-    @PostMapping(value = "/token", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    @PostMapping(value = TOKEN_PATH, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<AuthenticateResponse> authenticate(AuthenticateRequest authenticateRequest) {
 
-        logger.info("Received authentication request", authenticateRequest);
+        ResponseEntity<AuthenticateResponse> responseEntity;
 
-        return ResponseEntity.accepted().body(new AuthenticateResponse(createJWT(authenticateRequest.getClient_id(), authenticateRequest.getClient_secret()),"3600","Bearer"));
+        logger.info("Received authentication request {}", authenticateRequest);
+
+        responseEntity = ResponseEntity.ok().body(new AuthenticateResponse(createJWT(authenticateRequest.getClient_id(),
+                authenticateRequest.getClient_secret()), ServerProperty.getAuthenticationTokenInterval(),ServerProperty.getAuthenticationTokenType()));
+
+        logger.info("Responding with authentication response {}", responseEntity);
+
+        return responseEntity;
     }
 
     private String createJWT(String client_id, String client_secret) {
         Date now = new Date();
 
-        String keyString = HS256_KEY + Base64.getEncoder().encodeToString(client_secret.getBytes());
+        String keyString = ServerProperty.getAuthenticationTokenPrivateKey() + Base64.getEncoder().encodeToString(client_secret.getBytes());
 
         Key key = new SecretKeySpec(keyString.getBytes(), SignatureAlgorithm.HS256.getJcaName());
 
         return Jwts.builder().signWith(key)
                 .setNotBefore(now)
                 .setExpiration(getExpirationDate(now))
-                .setIssuer("NDS")
-                .setAudience("DHP")
+                .setIssuer(ServerProperty.getAuthenticationTokenIssuer())
+                .setAudience(ServerProperty.getAuthenticationTokenAudience())
                 .addClaims(createClaims())
                 .compact();
     }
@@ -58,11 +70,11 @@ public class AuthenticateController {
         Map<String, Object> map;
         String scope[] = new String[1];
 
-        scope[0] = "msg.dvanotifr";
+        scope[0] = ServerProperty.getAuthenticationTokenScope();
 
         map = new HashMap<>();
-        map.put("client_id","dhp_msg");
-        map.put("scope",scope);
+        map.put(CLIENT_ID,ServerProperty.getAuthenticationTokenClientId());
+        map.put(SCOPE,scope);
 
         return map;
     }
