@@ -1,4 +1,4 @@
-package org.nds.auth;
+package org.nds.auth.model;
 
 import org.springframework.web.bind.annotation.ResponseBody;
 
