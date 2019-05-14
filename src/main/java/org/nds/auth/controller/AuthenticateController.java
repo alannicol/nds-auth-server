@@ -9,10 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
+import java.time.Instant;
 import java.util.*;
 
 @RestController
@@ -26,21 +28,24 @@ public class AuthenticateController {
 
     @PostMapping(value = TOKEN_PATH, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<AuthenticateResponse> authenticate(AuthenticateRequest authenticateRequest) {
-
         ResponseEntity<AuthenticateResponse> responseEntity;
+        String token;
 
         logger.info("Received authentication request {}", authenticateRequest);
 
-        responseEntity = ResponseEntity.ok().body(new AuthenticateResponse(createJWT(authenticateRequest.getClient_id(),
-                authenticateRequest.getClient_secret()), ServerProperty.getAuthenticationTokenInterval(),ServerProperty.getAuthenticationTokenType()));
+        token = createJWT(authenticateRequest.getClient_secret());
+
+        logger.info("Created JWT {}", token);
+
+        responseEntity = ResponseEntity.ok().body(new AuthenticateResponse(token, ServerProperty.getAuthenticationTokenInterval(),ServerProperty.getAuthenticationTokenType()));
 
         logger.info("Responding with authentication response {}", responseEntity);
 
         return responseEntity;
     }
 
-    private String createJWT(String client_id, String client_secret) {
-        Date now = new Date();
+    private String createJWT(String client_secret) {
+        Date now = Date.from(Instant.now());
 
         String keyString = ServerProperty.getAuthenticationTokenPrivateKey() + Base64.getEncoder().encodeToString(client_secret.getBytes());
 
