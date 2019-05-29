@@ -11,6 +11,7 @@ public class ServerProperty {
     private static Logger logger = LoggerFactory.getLogger(ServerProperty.class);
 
     private static final String SERVER_PROPERTIES="server.properties";
+    private static final String SECURITY_PROPERTIES="security.properties";
     private static final String AUTHENTICATION_TOKEN_PRIVATE_KEY ="authentication.token.private.key";
     private static final String AUTHENTICATION_TOKEN_SECRET ="authentication.token.secret";
     private static final String AUTHENTICATION_TOKEN_INTERVAL ="authentication.token.interval";
@@ -20,44 +21,45 @@ public class ServerProperty {
     private static final String AUTHENTICATION_TOKEN_CLIENT_ID ="authentication.token.client.id";
     private static final String AUTHENTICATION_TOKEN_SCOPE ="authentication.token.scope";
 
-    private static Properties properties = obtainProperties();
+    private static Properties serverProperties = obtainProperties(SERVER_PROPERTIES);
+    private static Properties securityProperties = obtainProperties(SECURITY_PROPERTIES);
 
     public static String getAuthenticationTokenPrivateKey() {
-        return properties.get(AUTHENTICATION_TOKEN_PRIVATE_KEY).toString();
+        return securityProperties.get(AUTHENTICATION_TOKEN_PRIVATE_KEY).toString();
     }
 
     public static String getAuthenticationTokenSecret() {
-        return properties.get(AUTHENTICATION_TOKEN_SECRET).toString();
+        return securityProperties.get(AUTHENTICATION_TOKEN_SECRET).toString();
     }
 
     public static String getAuthenticationTokenInterval() {
-        return properties.get(AUTHENTICATION_TOKEN_INTERVAL).toString();
+        return serverProperties.get(AUTHENTICATION_TOKEN_INTERVAL).toString();
     }
 
     public static String getAuthenticationTokenType() {
-        return properties.get(AUTHENTICATION_TOKEN_TYPE).toString();
+        return serverProperties.get(AUTHENTICATION_TOKEN_TYPE).toString();
     }
 
     public static String getAuthenticationTokenIssuer() {
-        return properties.get(AUTHENTICATION_TOKEN_ISSUER).toString();
+        return serverProperties.get(AUTHENTICATION_TOKEN_ISSUER).toString();
     }
 
     public static String getAuthenticationTokenAudience() {
-        return properties.get(AUTHENTICATION_TOKEN_AUDIENCE).toString();
+        return serverProperties.get(AUTHENTICATION_TOKEN_AUDIENCE).toString();
     }
 
     public static String getAuthenticationTokenClientId() {
-        return properties.get(AUTHENTICATION_TOKEN_CLIENT_ID).toString();
+        return serverProperties.get(AUTHENTICATION_TOKEN_CLIENT_ID).toString();
     }
 
     public static String getAuthenticationTokenScope() {
-        return properties.get(AUTHENTICATION_TOKEN_SCOPE).toString();
+        return serverProperties.get(AUTHENTICATION_TOKEN_SCOPE).toString();
     }
 
-    private static Properties obtainProperties() {
+    private static Properties obtainProperties(String propertiesFile) {
         Properties properties=null;
 
-        try (BufferedInputStream bufferedInputStream = new BufferedInputStream(ServerProperty.class.getClassLoader().getResourceAsStream(SERVER_PROPERTIES))) {
+        try (BufferedInputStream bufferedInputStream = new BufferedInputStream(ServerProperty.class.getClassLoader().getResourceAsStream(propertiesFile))) {
             properties = new Properties();
             properties.load(bufferedInputStream);
         } catch(Exception exception) {
