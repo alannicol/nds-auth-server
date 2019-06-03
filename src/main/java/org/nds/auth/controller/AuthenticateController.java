@@ -74,7 +74,6 @@ public class AuthenticateController {
         Key key = new SecretKeySpec(keyString.getBytes(), SignatureAlgorithm.HS256.getJcaName());
 
         return Jwts.builder().signWith(key)
-                .setNotBefore(now)
                 .setExpiration(getExpirationDate(now))
                 .setIssuer(ServerProperty.getAuthenticationTokenIssuer())
                 .setAudience(ServerProperty.getAuthenticationTokenAudience())
