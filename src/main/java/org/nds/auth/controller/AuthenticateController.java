@@ -4,9 +4,11 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.nds.auth.model.AuthenticateRequest;
 import org.nds.auth.model.AuthenticateResponse;
+import org.nds.auth.model.AuthenticationError;
 import org.nds.auth.util.ServerProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.actuate.autoconfigure.ShellProperties;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,21 +29,40 @@ public class AuthenticateController {
     private static final String SCOPE="scope";
 
     @PostMapping(value = TOKEN_PATH, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public ResponseEntity<AuthenticateResponse> authenticate(AuthenticateRequest authenticateRequest) {
-        ResponseEntity<AuthenticateResponse> responseEntity;
+    public ResponseEntity<?> authenticate(AuthenticateRequest authenticateRequest) {
+        ResponseEntity<?> responseEntity;
         String token;
 
         logger.info("Received authentication request {}", authenticateRequest);
 
-        token = createJWT(authenticateRequest.getClient_secret());
+        if(requestBodyIsValid(authenticateRequest.getClient_id(), authenticateRequest.getClient_secret())) {
+            logger.info("Received valid authentication request {}", authenticateRequest);
 
-        logger.info("Created JWT {}", token);
+            token = createJWT(authenticateRequest.getClient_secret());
 
-        responseEntity = ResponseEntity.ok().body(new AuthenticateResponse(token, ServerProperty.getAuthenticationTokenInterval(),ServerProperty.getAuthenticationTokenType()));
+            logger.info("Created JWT {}", token);
 
-        logger.info("Responding with authentication response {}", responseEntity);
+            responseEntity = ResponseEntity.ok().body(new AuthenticateResponse(token, ServerProperty.getAuthenticationTokenInterval(),ServerProperty.getAuthenticationTokenType()));
+
+            logger.info("Responding with authentication response {}", responseEntity);
+        } else {
+            logger.info("Received invalid authentication request {}", authenticateRequest);
+
+            responseEntity = ResponseEntity.badRequest().body(new AuthenticationError("Post contains invalid request body"));
+        }
 
         return responseEntity;
+    }
+
+    private boolean requestBodyIsValid(String client_id, String client_Secret) {
+        boolean valid=false;
+
+        if((client_id!=null && client_id.equalsIgnoreCase(ServerProperty.getAuthenticationTokenClientId()))
+                && (client_Secret!=null && client_Secret.equalsIgnoreCase(ServerProperty.getAuthenticationTokenSecret()))) {
+            valid=true;
+        }
+
+        return valid;
     }
 
     private String createJWT(String client_secret) {
